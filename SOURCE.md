@@ -1,62 +1,168 @@
-# Data Source Proposals
+# Bitcoin Order-Book Data Sources
 
-**Team:** Dror Leibov and Ofir Gelbart  
+**Team:** Dror Leibov and Ofir Gelbart
 **Course:** Fundamentals of Information Technology (2026–2027)
 
-## Proposal 1: Bitcoin Price Differences Between Exchanges
+## 1. Approved Sources and Collection Settings
 
-- **Purpose and research question:** Compare the live buying and selling offers for Bitcoin (BTC/USD) on two exchanges. Do the differences between their best available prices change by hour of day?
-- **Sources and URLs:**
-  - Kraken order book (BTC/USD): https://api.kraken.com/0/public/Depth?pair=XBTUSD&count=5
-  - Bitstamp order book (BTC/USD): https://www.bitstamp.net/api/v2/order_book/btcusd/
-- **Expected content:** JSON order-book snapshots showing bid prices (offers to buy), ask prices (offers to sell), and the quantities available at each price. We would record the collection time, exchange, currency pair, best bid, best ask, and their quantities.
-- **Proposed update / collection frequency:** Market offers change continuously. We propose sampling each exchange every 5 minutes, subject to approval and API restrictions.
-- **Expected sample size:** Two API responses per collection (one per exchange). If each reduced snapshot is about 2–5 KB, this would be about 4–10 KB per collection, or roughly 40–101 MB over ten weeks of 24/7 sampling. These are *planning estimates*, not measured response sizes; full API responses might be larger.
-- **Authentication:** The documented public order-book endpoints do not normally require an API key, user login, or password to read market data. Actual access from the course environment still needs testing.
-- **Example data:** The following is a shortened excerpt of a **documentation sample from Kraken**, not a live measurement by our team:
+We selected Proposal 1, comparing BTC/USD order books on Kraken and Bitstamp, following the instructors' approval and feedback.
 
-```json
-{
-  "error": [],
-  "result": {
-    "XXBTZUSD": {
-      "asks": [["30384.10000", "2.059", 1688671659]],
-      "bids": [["30297.00000", "1.115", 1688671636]]
-    }
-  }
-}
-```
+Research question: How do differences in the best BTC/USD bid and ask prices between Kraken and Bitstamp vary over time, and how are they associated with each exchange's bid-ask spread and quantities available at the five best price levels?
 
-  Example source: https://docs.kraken.com/api-reference/market-data/get-order-book
-- **Why live collection matters / limitations:** Offers may change or disappear between samples; past exact snapshots may not be retrievable from the public endpoints. However, commercial archives may exist. Exchange time differences, fees, API limits, permission for automated access, and public publication rights must be checked before selecting this project.
+This is an observational comparison: associations will not establish causation.
 
-## Proposal 2: Bitcoin vs. Ethereum Market Liquidity
+| Property | Kraken | Bitstamp |
+|---|---|---|
+| Source | Public BTC/USD order book | Public BTC/USD order book |
+| Endpoint | https://api.kraken.com/0/public/Depth?pair=XBTUSD&count=5 | https://www.bitstamp.net/api/v2/order_book/btcusd/ |
+| Documentation | https://docs.kraken.com/api-reference/market-data/get-order-book | https://www.bitstamp.net/api/ |
+| Response format | JSON | JSON |
+| API key or login | Not required for this endpoint; tested successfully | Not required for this endpoint; tested successfully |
+| Retained depth | Five bid and five ask price levels | Five bid and five ask price levels, selected from the larger response |
+| Planned collection frequency | One request every five minutes | One request every five minutes |
+| Initial collection | One manual snapshot on each of 17–20 November 2026 | Collected during the same four collection sessions |
+| License and usage terms | Provider-controlled content, subject to Kraken's applicable terms; no open-data redistribution license has been established for this project | Provider-controlled exchange data; the API documentation directs commercial users to obtain a Data License Agreement |
 
-- **Purpose and research question:** Compare how much Bitcoin (BTC/USD) and Ethereum (ETH/USD) is offered for sale or purchase at several price levels. Does the estimated cost of a hypothetical larger purchase vary by asset and by time of day?
-- **Sources and URLs:**
-  - Kraken order book documentation: https://docs.kraken.com/api-reference/market-data/get-order-book
-  - Bitstamp order-book API documentation: https://www.bitstamp.net/api/
-  - Example Bitstamp market URL: https://www.bitstamp.net/api/v2/order_book/ethusd/
-- **Expected content:** JSON snapshots of bid and ask price levels and the quantity at each level for BTC/USD and ETH/USD. We would retain a small fixed number of price levels and note the collection time, exchange, and currency pair.
-- **Proposed update / collection frequency:** Liquidity changes continuously. We propose sampling every 10 minutes, subject to approval and API limits.
-- **Expected sample size:** Four API responses per collection (two assets at two exchanges). Assuming reduced snapshots of 2–5 KB each, approximately 8–20 KB per collection, or roughly 81–202 MB across ten weeks of 24/7 sampling. These are *estimates* pending an actual size measurement.
-- **Authentication:** These public order-book endpoints ordinarily do not require an API key, user login, or password for reading data; this needs confirmation by an actual request.
-- **Example data:** The following is a shortened excerpt of a **documentation sample from Bitstamp**, showing the format of one order-book response (not a live BTC or ETH observation by our team):
+All collection times, directory dates, and filenames use UTC.
 
-```json
-{
-  "timestamp": "1643643584",
-  "microtimestamp": "1643643584684047",
-  "bids": [["9484.34", "1.00000000"]],
-  "asks": [["9484.34", "1.00000000"]]
-}
-```
+Kraken's published public REST guidance states that one request per second or less remains within its rate limits. Bitstamp's API documentation specifies standard limits of 400 requests per second and 10,000 requests per ten minutes. Our planned five-minute interval is substantially lower. Limits may change, and requests from the same IP may share limits.
 
-  Example source: https://www.bitstamp.net/api/ (Order book → Response samples)
-- **Why live collection matters / limitations:** Visible liquidity changes as orders are added, removed, or executed. However, third-party historical data archives may exist, and order-book depth does not guarantee executable trade prices. The legality of automated collection and public display still requires verification.
+Public technical access is not equivalent to an unrestricted data license. This is an educational project; we do not claim ownership of the providers' market data or assign an open license to it. Permission for public redistribution of raw data or public website display has not been established by our access tests and must be clarified before extending publication.
 
-## Preferred Proposal
+References:
+- https://support.kraken.com/articles/206548367-what-are-the-api-rate-limits-
+- https://www.kraken.com/legal
+- https://www.kraken.com/legal/global-terms
+- https://www.bitstamp.net/api/
 
-**Proposal 1 — Bitcoin Price Differences Between Exchanges** is our current preference because it offers a focused comparison of two competing businesses and a straightforward quantitative question.
+## 2. Collected Information and Limitations
 
-**Status:** These are *proposals*, not approved data sources. The examples above come from published API documentation, not requests performed by us. Before approval, we need to check real responses, storage size, historical availability, and applicable terms of use. Both proposals currently use the same two providers; if the instructors require two entirely different provider pairs, we will revise the alternatives.
+Each collection session produces one JSON file containing observations from both exchanges.
+
+For each exchange, we retain:
+- Five highest bid prices and their quantities.
+- Five lowest ask prices and their quantities.
+- The UTC time immediately before starting the request.
+
+A bid is an offer to buy BTC; an ask is an offer to sell BTC. Each entry represents a price level and its available quantity, not necessarily one trader or one individual order.
+
+The file contains `kraken_collected_at_utc`, `bitstamp_collected_at_utc`, `kraken`, and `bitstamp`. We preserve Kraken's returned structure and retain Bitstamp's `timestamp`, `microtimestamp`, and selected bid/ask arrays.
+
+Files follow `raw/YYYY-mm-dd/HHMM.json`, using the start time of the Kraken request as the collection-session filename. Files are append-only: existing samples are not edited, renamed, or overwritten.
+
+Initial samples:
+- `raw/2026-11-17/1143.json`
+- `raw/2026-11-18/1818.json`
+- `raw/2026-11-19/0625.json`
+- `raw/2026-11-20/1025.json`
+
+Each initial file is 868 bytes; the four files total 3,472 bytes.
+
+Prices, quantities, and timestamps vary. Provider names, the currency pair, and the retained depth are fixed project settings.
+
+Limitations:
+- Requests are sequential rather than simultaneous. The first session had a 16-second gap; separate collection timestamps preserve this difference.
+- Collection timestamps record request starts, not exact matching-engine observation times.
+- Only five levels per side are retained, so deeper liquidity is not represented.
+- Offers can change or disappear before a trade occurs.
+- Price differences do not establish executable profit: fees, transfer delays, available balances, and execution constraints are not included.
+- Four manual sessions cannot establish reliable hourly patterns. Those questions require the later, denser collection stage.
+- Public trade histories are different from our collected order-book snapshots. We have not established that equivalent historical snapshots are unavailable from every third-party archive.
+- Missing samples will remain missing; we will not fabricate or backdate observations.
+
+Initial checks confirmed empty Kraken error arrays and five retained entries on each side at both exchanges. Source timestamps were also inspected where available.
+
+## 3. Planned Dataset Schema
+
+The future normalized table will be stored as `data/dataset.csv`, with one header row.
+
+One row represents one price level, on one side, at one exchange, within one collection session. A complete session produces 20 rows: two exchanges times two sides times five levels. The four initial sessions should therefore produce 80 data rows.
+
+| Column | Meaning | Type and unit |
+|---|---|---|
+| snapshot_id | Relative raw-file path identifying the shared collection session | Text |
+| collected_at_utc | UTC request-start time for the relevant exchange | ISO 8601 text ending in Z |
+| exchange | `kraken` or `bitstamp` | Text |
+| pair | Standardized currency pair, `BTC/USD` | Text |
+| side | `bid` for buy offers or `ask` for sell offers | Text |
+| level | Rank from 1 to 5, where 1 is the best price on that side | Integer; no unit |
+| price_usd | Price of one BTC at that level | Decimal; USD per BTC |
+| quantity_btc | Available BTC quantity at that price level | Decimal; BTC |
+
+Bids are ranked by descending numeric price; asks by ascending numeric price. Source price and quantity strings will be interpreted as decimal values.
+
+The intended row identifier is `(snapshot_id, exchange, side, level)`. Missing or invalid values will not be replaced with invented values. Incomplete sessions will be reported rather than silently treated as complete.
+
+## 4. Reasons for Selecting These Fields
+
+- `snapshot_id` connects both exchanges to the same collection session and traces each row to its raw file.
+- `collected_at_utc` supports time comparisons and exposes timing differences between requests.
+- `exchange` distinguishes the providers.
+- `pair` makes the asset and quote currency explicit.
+- `side` separates buying from selling offers.
+- `level` identifies the best price and the next four levels.
+- `price_usd` supports cross-exchange price and bid-ask spread comparisons.
+- `quantity_btc` provides context about visible liquidity at each price level.
+
+Retaining five levels preserves the best prices and some nearby liquidity while keeping storage small.
+
+We do not retain Bitstamp's full order book. This limits deeper-liquidity analysis but avoids the much larger storage requirement of full responses.
+
+Kraken's error field and level timestamps, and Bitstamp's source timestamps, remain available in the raw files but are not separate columns in the initial normalized schema. Kraken's per-level timestamp and Bitstamp's book timestamp describe different objects, so we do not combine them into a falsely equivalent timestamp column.
+
+Derived measures, such as spreads and cross-exchange differences, will be calculated later from the collected data rather than inserted as unsupported observations.
+
+## 5. Mapping Source Fields to Dataset Columns
+
+Here, `i` denotes an entry after numeric price ranking, starting at zero. The saved JSON includes the provider wrapper names shown below.
+
+| Dataset column | Kraken mapping | Bitstamp mapping |
+|---|---|---|
+| snapshot_id | Relative raw-file path | Relative raw-file path |
+| collected_at_utc | `kraken_collected_at_utc` | `bitstamp_collected_at_utc` |
+| exchange | Assigned constant `kraken` | Assigned constant `bitstamp` |
+| pair | Standardize `XXBTZUSD` to `BTC/USD`, according to the requested pair | Assigned `BTC/USD` from the `btcusd` endpoint |
+| side | `bids` becomes `bid`; `asks` becomes `ask` | `bids` becomes `bid`; `asks` becomes `ask` |
+| level | Numeric price rank, `i + 1` | Numeric price rank, `i + 1` |
+| price_usd | `kraken.result.XXBTZUSD.bids[i][0]` or `asks[i][0]` | `bitstamp.bids[i][0]` or `asks[i][0]` |
+| quantity_btc | `kraken.result.XXBTZUSD.bids[i][1]` or `asks[i][1]` | `bitstamp.bids[i][1]` or `asks[i][1]` |
+
+The `[2]` element of each Kraken price-level entry is retained in raw JSON but excluded from the initial CSV. Bitstamp's `timestamp` and `microtimestamp` are likewise retained in raw JSON.
+
+## 6. Expected Storage for the Collection Period
+
+Planning assumptions:
+- Ten weeks of continuous collection, stated explicitly as the estimation horizon.
+- One combined snapshot every five minutes, 24 hours per day.
+- Five bid and five ask levels per exchange.
+- Decimal MB means 1,000,000 bytes.
+
+If the actual collection period differs, estimates scale proportionally with the number of days.
+
+Number of snapshots:
+`10 * 7 * 24 * 60 / 5 = 20,160`
+
+### Raw JSON
+
+Measured initial snapshot size: 868 bytes.
+
+Estimated JSON content:
+`20,160 * 868 = 17,498,880 bytes`, approximately **17.5 MB**.
+
+A conservative content budget of 2,000 bytes per snapshot gives approximately **40.3 MB**.
+
+Filesystem block allocation and directories consume additional space. For example, one 4 KiB allocation block per snapshot would consume approximately 82.6 MB for file blocks alone; actual filesystem allocation must be monitored.
+
+### Normalized CSV
+
+Expected rows:
+`20,160 * 20 = 403,200 data rows`, plus one header.
+
+The normalized file has not yet been generated. Assuming an average of 200 bytes per row, including separators and newline:
+`403,200 * 200 = 80,640,000 bytes`, approximately **80.6 MB**, plus the small header.
+
+This is a planning estimate, not a measured CSV size. It will be revised after normalization is implemented.
+
+The conservative raw-content budget plus the CSV estimate is approximately **121 MB**, before filesystem overhead, Git history, and other project files. Both data outputs are expected to fit within the 500 MB project limit under these assumptions. We will monitor actual disk usage and revise the plan if necessary.
+
+The current four manual daily samples are an initial exercise stage; five-minute automated collection has not yet been implemented.
