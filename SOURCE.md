@@ -132,37 +132,40 @@ The `[2]` element of each Kraken price-level entry is retained in raw JSON but e
 ## 6. Expected Storage for the Collection Period
 
 Planning assumptions:
-- Ten weeks of continuous collection, stated explicitly as the estimation horizon.
+- Thirteen weeks of continuous collection as the semester-length estimation horizon.
 - One combined snapshot every five minutes, 24 hours per day.
-- Five bid and five ask levels per exchange.
+- Five bid and five ask levels per exchange, giving 20 CSV rows per snapshot.
 - Decimal MB means 1,000,000 bytes.
 
 If the actual collection period differs, estimates scale proportionally with the number of days.
 
 Number of snapshots:
-`10 * 7 * 24 * 60 / 5 = 20,160`
+`13 * 7 * 24 * 60 / 5 = 26,208`
 
 ### Raw JSON
 
 Measured initial snapshot size: 868 bytes.
 
 Estimated JSON content:
-`20,160 * 868 = 17,498,880 bytes`, approximately **17.5 MB**.
+`26,208 * 868 = 22,748,544 bytes`, approximately **22.7 MB**.
 
-A conservative content budget of 2,000 bytes per snapshot gives approximately **40.3 MB**.
+A conservative content budget of 2,000 bytes per snapshot gives:
+`26,208 * 2,000 = 52,416,000 bytes`, approximately **52.4 MB**.
 
-Filesystem block allocation and directories consume additional space. For example, one 4 KiB allocation block per snapshot would consume approximately 82.6 MB for file blocks alone; actual filesystem allocation must be monitored.
+Filesystem block allocation and directories consume additional space. For example, one 4 KiB allocation block per snapshot would consume:
+`26,208 * 4,096 = 107,347,968 bytes`, approximately **107.3 MB** for file blocks alone. Actual filesystem allocation must be monitored.
 
 ### Normalized CSV
 
 Expected rows:
-`20,160 * 20 = 403,200 data rows`, plus one header.
+`26,208 * 20 = 524,160 data rows`, plus one header.
 
 The normalized file has not yet been generated. Assuming an average of 200 bytes per row, including separators and newline:
-`403,200 * 200 = 80,640,000 bytes`, approximately **80.6 MB**, plus the small header.
+`524,160 * 200 = 104,832,000 bytes`, approximately **104.8 MB**, plus the small header.
 
 This is a planning estimate, not a measured CSV size. It will be revised after normalization is implemented.
 
-The conservative raw-content budget plus the CSV estimate is approximately **121 MB**, before filesystem overhead, Git history, and other project files. Both data outputs are expected to fit within the 500 MB project limit under these assumptions. We will monitor actual disk usage and revise the plan if necessary.
+The conservative raw-content budget plus the CSV estimate is:
+`52,416,000 + 104,832,000 = 157,248,000 bytes`, approximately **157.2 MB**, before filesystem overhead, Git history, and other project files. Both data outputs are expected to fit within the 500 MB project limit under these assumptions. We will monitor actual disk usage and revise the plan if necessary.
 
 The current four manual daily samples are an initial exercise stage; five-minute automated collection has not yet been implemented.
