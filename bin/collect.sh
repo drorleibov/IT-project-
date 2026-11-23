@@ -31,3 +31,4 @@ jq -n \
     asks: $b[0].asks[:5]
     }
   }' > "$FILE"
+rm kraken.json bitstamp.json
