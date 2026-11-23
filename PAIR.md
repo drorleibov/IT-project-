@@ -14,3 +14,17 @@ Responsibility for reviewing and completing the sections:
 
 ### AI Assistance
 ChatGPT assisted with collection commands, troubleshooting, and organizing and wording the information in SOURCE.md. The team executed the commands and checked the outputs.
+
+## Homework 4
+
+### Automatic Data Collection
+
+- **Dror:** Developed and tested `bin/collect.sh`, troubleshot execution errors, and verified that the script saves JSON files in the correct directory.
+- **Ofir:** Reviewed the collected data and checked its consistency with the data schema and project requirements.
+- **Both:** Reviewed the final results and ensured that the project documentation was consistent with the implementation.
+
+### AI Assistance
+
+ChatGPT was used to explain commands, guide the implementation process, and help troubleshoot errors. The team performed the steps, executed the commands, and checked the results.
+
+The AI prompts and descriptions of how ChatGPT was used for Homework 3 and Homework 4 are documented in `AI_PROMPTS.md`.
